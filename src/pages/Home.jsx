@@ -7,6 +7,16 @@ import {
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
+// Generate or retrieve unique device/client session ID
+function getDeviceClientId() {
+  let clientId = localStorage.getItem('sendora_device_client_id');
+  if (!clientId) {
+    clientId = 'device_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+    localStorage.setItem('sendora_device_client_id', clientId);
+  }
+  return clientId;
+}
+
 export default function Home() {
   // Agent states for embedded agent on homepage
   const [instruction, setInstruction] = useState('');
@@ -27,8 +37,9 @@ export default function Home() {
 
   const fetchLogs = async () => {
     setLoadingLogs(true);
+    const clientId = getDeviceClientId();
     try {
-      const res = await fetch(`${API_BASE}/api/email-logs`);
+      const res = await fetch(`${API_BASE}/api/email-logs?clientId=${encodeURIComponent(clientId)}`);
       if (res.ok) {
         const data = await res.json();
         setLogs(Array.isArray(data) ? data : []);
@@ -101,6 +112,7 @@ export default function Home() {
     ]);
 
     try {
+      const clientId = getDeviceClientId();
       const res = await fetch(`${API_BASE}/api/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -108,7 +120,8 @@ export default function Home() {
           to,
           subject: draft.subject,
           body: draft.body,
-          request: instruction
+          request: instruction,
+          clientId
         })
       });
 
@@ -469,8 +482,8 @@ export default function Home() {
                 <Phone size={24} color="#16a34a" />
               </div>
               <h3 className="contact-card-title">Phone Support</h3>
-              <p className="contact-card-desc">Call our official helpline directly for urgent issues:</p>
-              <a href="tel:9063889100" className="contact-highlight-link">
+              <p className="contact-card-desc">Click below to open dialer and call our helpline directly:</p>
+              <a href="tel:+919063889100" className="contact-highlight-link" title="Click to call +91 9063889100">
                 +91 9063889100
               </a>
             </div>
@@ -480,8 +493,12 @@ export default function Home() {
                 <Mail size={24} color="#16a34a" />
               </div>
               <h3 className="contact-card-title">Email Inquiries</h3>
-              <p className="contact-card-desc">Send us your feedback, bug reports or questions:</p>
-              <a href="mailto:kambagirinandan@gmail.com" className="contact-highlight-link">
+              <p className="contact-card-desc">Click below to open your email client and send feedback:</p>
+              <a 
+                href="mailto:kambagirinandan@gmail.com?subject=Sendora%20Website%20Inquiry%20or%20Complaint&body=Hello%20Sendora%20Team,%0A%0AI%20would%20like%20to%20report%20an%20issue%20or%20inquire%20about:%0A" 
+                className="contact-highlight-link"
+                title="Click to compose email to kambagirinandan@gmail.com"
+              >
                 kambagirinandan@gmail.com
               </a>
             </div>

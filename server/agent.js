@@ -149,9 +149,10 @@ export function getLocalLogs() {
   return readLocalLogs();
 }
 
-export async function logEmail({ request, to_email, subject, body, status, error = null }) {
+export async function logEmail({ request, to_email, subject, body, status, error = null, clientId = null }) {
   const newEntry = {
     id: 'local-' + Date.now(),
+    clientId: clientId || null,
     created_at: new Date().toISOString(),
     request: request || '',
     to_email,
@@ -279,7 +280,7 @@ Respond ONLY with a valid JSON object matching this schema, without markdown for
 /**
  * Sends approved draft and records log to Supabase.
  */
-export async function executeSendEmail({ to, subject, body, request }) {
+export async function executeSendEmail({ to, subject, body, request, clientId }) {
   if (!to || !EMAIL_REGEX.test(to)) {
     throw new Error('Valid recipient email address is required.');
   }
@@ -298,7 +299,8 @@ export async function executeSendEmail({ to, subject, body, request }) {
       subject,
       body,
       status: 'sent',
-      error: null
+      error: null,
+      clientId
     });
     return {
       success: true,
@@ -314,7 +316,8 @@ export async function executeSendEmail({ to, subject, body, request }) {
       subject,
       body,
       status: 'failed',
-      error: err.message
+      error: err.message,
+      clientId
     });
     throw err;
   }

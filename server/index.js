@@ -55,7 +55,7 @@ app.post('/api/draft-email', async (req, res) => {
 // 3. Send email route (sends approved draft)
 app.post('/api/send-email', async (req, res) => {
   try {
-    const { to, subject, body, request } = req.body;
+    const { to, subject, body, request, clientId } = req.body;
 
     if (!to || typeof to !== 'string' || !to.trim()) {
       return res.status(400).json({ error: 'Recipient email "to" is required.' });
@@ -71,7 +71,8 @@ app.post('/api/send-email', async (req, res) => {
       to: to.trim(),
       subject: subject.trim(),
       body: body.trim(),
-      request: request || `Send email to ${to}`
+      request: request || `Send email to ${to}`,
+      clientId: clientId || null
     });
 
     return res.status(200).json(result);
@@ -81,25 +82,20 @@ app.post('/api/send-email', async (req, res) => {
   }
 });
 
-// 4. Get recent email logs route
+// 4. Get recent email logs route (filtered by device clientId)
 app.get('/api/email-logs', async (req, res) => {
   try {
-    const supabase = getSupabaseClient();
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('email_logs')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(20);
+    const { clientId } = req.query;
+    const { getLocalLogs } = await import('./agent.js');
+    const allLogs = getLocalLogs();
 
-      if (!error && Array.isArray(data) && data.length > 0) {
-        return res.status(200).json(data);
-      }
+    if (clientId) {
+      // Filter logs specific to this device/user so history is never leaked across devices
+      const deviceLogs = allLogs.filter(log => log.clientId === clientId);
+      return res.status(200).json(deviceLogs);
     }
 
-    // Fallback to local logs so the UI always displays sent emails
-    const { getLocalLogs } = await import('./agent.js');
-    return res.status(200).json(getLocalLogs());
+    return res.status(200).json(allLogs);
   } catch (error) {
     console.error('Error in /api/email-logs:', error);
     return res.status(500).json({ error: error.message || 'Failed to fetch logs.' });

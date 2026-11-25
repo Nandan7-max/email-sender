@@ -28,7 +28,7 @@ export default function Navbar({ theme, toggleTheme }) {
 
         {/* Right CTA Pill Button matching Agrica style */}
         <div className="agrica-actions">
-          <a href="tel:9063889100" className="agrica-cta-btn">
+          <a href="tel:+919063889100" className="agrica-cta-btn" title="Click to call +91 9063889100">
             <PhoneCall size={15} />
             <span>+91 9063889100</span>
           </a>

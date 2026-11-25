@@ -1,5 +1,15 @@
 [
   {
+    "id": "local-1795599280351",
+    "created_at": "2026-11-25T09:34:40.351Z",
+    "request": "hi to kambagirinandan@gmail.com",
+    "to_email": "kambagirinandan@gmail.com",
+    "subject": "Hello and Greetings",
+    "body": "Hello,\n\nI hope this email finds you well. I am reaching out to say hello and connect with you.\n\nBest regards,\n\nFrom Sendora",
+    "status": "sent",
+    "error": null
+  },
+  {
     "id": "local-1795597482714",
     "created_at": "2026-11-25T09:04:42.714Z",
     "request": "hi vishnu to vishnuroyal477@gmail.com",
