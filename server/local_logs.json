@@ -1,5 +1,38 @@
 [
   {
+    "id": "local-1795600141844",
+    "clientId": "device_df25daznv_1795599550478",
+    "created_at": "2026-11-25T09:49:01.844Z",
+    "request": "say happy birthday to sanjunaik009988@gmail.com",
+    "to_email": "sanjunaik009988@gmail.com",
+    "subject": "say happy birthday",
+    "body": "Hello,\n\nsay happy birthday\n\nBest regards,\nFrom Sendora",
+    "status": "sent",
+    "error": null
+  },
+  {
+    "id": "local-1795600042478",
+    "clientId": "device_df25daznv_1795599550478",
+    "created_at": "2026-11-25T09:47:22.478Z",
+    "request": "hi to sanjunaik009988@gmail.com",
+    "to_email": "sanjunaik009988@gmail.com",
+    "subject": "hi",
+    "body": "Hello Sanjana,\n\nhi\n\nBest regards,\nFrom Sendora",
+    "status": "sent",
+    "error": null
+  },
+  {
+    "id": "local-1795599955800",
+    "clientId": "device_df25daznv_1795599550478",
+    "created_at": "2026-11-25T09:45:55.800Z",
+    "request": "hi to sanjunika009988@gmail.com",
+    "to_email": "sanjunika009988@gmail.com",
+    "subject": "Hello and Greetings",
+    "body": "Hello Sanjana ,\n\nI hope this email finds you well. I am reaching out to say hello as requested.\n\nBest regards,\n\nFrom Sendora",
+    "status": "sent",
+    "error": null
+  },
+  {
     "id": "local-1795599280351",
     "created_at": "2026-11-25T09:34:40.351Z",
     "request": "hi to kambagirinandan@gmail.com",

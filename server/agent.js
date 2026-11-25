@@ -208,46 +208,75 @@ export async function planAndDraftEmail(context) {
 
   if (apiKey) {
     try {
-      const prompt = `You are Sendora, an intelligent AI email sending agent.
-The user gave this instruction: "${context}"
+      const prompt = `You are Sendora, an elite AI executive communications copywriter and email assistant.
+The user gave this raw instruction: "${context}"
 
-Analyze this instruction carefully:
-1. Extract the recipient email address. If no recipient email address is present in the instruction, set "to" to empty string ("").
-2. Formulate a step-by-step plan of what you determined.
-3. Write a polite, clear, professional subject line.
-4. Write a polite, high-quality, professional email body based on the instruction. Sign off as "From Sendora".
+Your job is to thoroughly analyze the user's intent and topic, and generate an outstanding, professional, polished email.
 
-Respond ONLY with a valid JSON object matching this schema, without markdown formatting or code blocks:
+RULES:
+1. RECIPIENT: Extract the recipient email address. If none is mentioned, return "".
+2. SUBJECT LINE: DO NOT simply copy the user's instruction words verbatim. Instead, intelligently summarize the core objective into a clean, engaging, business-standard email subject line (e.g., if user says "meeting tomorrow at 4", subject should be "Meeting Confirmation & Discussion - Tomorrow at 4:00 PM").
+3. EMAIL BODY: DO NOT return a raw or robotic one-liner. Expand the user's topic into an elegant, complete, multi-paragraph email containing:
+   - A warm, respectful greeting (e.g. "Dear [Recipient]," or "Hello,")
+   - A clear opening sentence explaining the purpose of reaching out
+   - A well-written, articulate middle paragraph expanding on the topic or question
+   - A polite call to action or closing remark
+   - Sign off as:
+     Best regards,
+     From Sendora
+4. PLAN: Provide a clear 1-2 sentence explanation of how you transformed the user's input.
+
+Respond ONLY with a valid JSON object matching this schema:
 {
   "to": "recipient email or empty string",
-  "plan": "Step-by-step explanation of what the agent determined",
-  "subject": "Professional email subject",
-  "body": "Full professional email body"
+  "plan": "Explanation of analyzed topic and crafted response",
+  "subject": "Intelligent and polished subject line",
+  "body": "Complete, eloquent multi-paragraph email body"
 }`;
 
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: {
-            responseMimeType: 'application/json'
-          }
-        })
-      });
+      // Try available gemini models in order if one experiences a temporary 503 spike
+      const candidateModels = [
+        'gemini-3.5-flash-lite',
+        'gemini-flash-latest',
+        'gemini-3.1-flash-lite',
+        'gemini-flash-lite-latest'
+      ];
 
-      const data = await res.json();
-      if (data.candidates && data.candidates[0]?.content?.parts) {
-        const text = data.candidates[0].content.parts[0].text;
-        const parsed = JSON.parse(text);
+      let generatedData = null;
+
+      for (const modelName of candidateModels) {
+        try {
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+
+          const data = await res.json();
+          if (data.candidates && data.candidates[0]?.content?.parts) {
+            generatedData = data.candidates[0].content.parts[0].text;
+            break;
+          } else if (data.error) {
+            console.warn(`Model ${modelName} returned status ${data.error.code}:`, data.error.message);
+          }
+        } catch (e) {
+          console.warn(`Attempt with ${modelName} failed:`, e.message);
+        }
+      }
+
+      if (generatedData) {
+        const parsed = JSON.parse(generatedData);
         return {
           to: parsed.to ? parsed.to.trim() : '',
           plan: parsed.plan || `Analyzed user instruction: "${context}". Extracted recipient and drafted content.`,
           subject: parsed.subject || 'Message from Sendora',
           body: parsed.body || context
         };
-      } else if (data.error) {
-        console.warn('Gemini API returned error:', data.error);
       }
     } catch (err) {
       console.warn('Gemini drafting failed, falling back to rule parser:', err.message);
@@ -263,10 +292,24 @@ Respond ONLY with a valid JSON object matching this schema, without markdown for
     cleaned = cleaned.replace(to, '').replace(/to\s*:?/i, '').replace(/send\s*(an?\s*email\s*)?/i, '').trim();
   }
 
-  const subject = cleaned ? (cleaned.length > 30 ? cleaned.slice(0, 30) + '...' : cleaned) : 'Message from Sendora';
-  const body = `Hello,\n\n${cleaned || context}\n\nBest regards,\nFrom Sendora`;
+  // Generate an intelligent topic-based subject instead of copying raw words
+  let subject = 'Quick Note & Follow-up';
+  if (/meet|call|schedule|demo|sync/i.test(cleaned)) {
+    subject = 'Upcoming Discussion & Schedule Confirmation';
+  } else if (/photo|workshop|camera/i.test(cleaned)) {
+    subject = 'Information Regarding the Photography Workshop';
+  } else if (/project|update|status/i.test(cleaned)) {
+    subject = 'Project Progress & Status Check-in';
+  } else if (/hello|hi|hey|greet/i.test(cleaned)) {
+    subject = 'Warm Greetings & Connecting with You';
+  } else if (cleaned.length > 5) {
+    subject = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+    if (subject.length > 40) subject = subject.slice(0, 37) + '...';
+  }
+
+  const body = `Dear Colleague,\n\nI hope this email finds you having a productive week.\n\nI am reaching out regarding ${cleaned || 'our recent conversation'}. Please review the details at your convenience, and let me know if you have any questions or if there is anything I can assist with.\n\nLooking forward to hearing from you soon.\n\nBest regards,\nFrom Sendora`;
   const plan = to
-    ? `Identified recipient <${to}> from instruction. Drafted polite subject and body based on: "${context}".`
+    ? `Analyzed instruction topic for <${to}>. Generated intelligent subject "${subject}" and polished email body.`
     : `Could not identify recipient email in "${context}". Requesting recipient email from user.`;
 
   return {
