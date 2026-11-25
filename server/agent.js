@@ -126,7 +126,7 @@ export const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
 
 /**
  * Parses user context into email components (recipient, subject, body).
- * Uses Gemini via @google/genai or ADK if key is available, or fallback rule-based parser.
+ * Uses Gemini API via gemini-3.5-flash-lite, or fallback rule-based parser.
  */
 export async function planAndDraftEmail(context) {
   if (!context || typeof context !== 'string' || !context.trim()) {
@@ -137,19 +137,16 @@ export async function planAndDraftEmail(context) {
 
   if (apiKey) {
     try {
-      const { GoogleGenAI } = await import('@google/genai');
-      const ai = new GoogleGenAI({ apiKey });
-      
       const prompt = `You are MailPilot, an intelligent AI email sending agent.
 The user gave this instruction: "${context}"
 
-Analyze this instruction carefully.
+Analyze this instruction carefully:
 1. Extract the recipient email address. If no recipient email address is present in the instruction, set "to" to empty string ("").
-2. Formulate a step-by-step plan.
+2. Formulate a step-by-step plan of what you determined.
 3. Write a polite, clear, professional subject line.
 4. Write a polite, high-quality, professional email body based on the instruction.
 
-Respond ONLY with a valid JSON object matching this schema:
+Respond ONLY with a valid JSON object matching this schema, without markdown formatting or code blocks:
 {
   "to": "recipient email or empty string",
   "plan": "Step-by-step explanation of what the agent determined",
@@ -157,29 +154,36 @@ Respond ONLY with a valid JSON object matching this schema:
   "body": "Full professional email body"
 }`;
 
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: prompt,
-        config: {
-          responseMimeType: 'application/json'
-        }
+      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent?key=${apiKey}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: 'application/json'
+          }
+        })
       });
 
-      const responseText = response.text || '';
-      const parsed = JSON.parse(responseText);
-
-      return {
-        to: parsed.to ? parsed.to.trim() : '',
-        plan: parsed.plan || `Analyzed user instruction: "${context}". Extracted recipient and drafted content.`,
-        subject: parsed.subject || 'Message from MailPilot',
-        body: parsed.body || context
-      };
+      const data = await res.json();
+      if (data.candidates && data.candidates[0]?.content?.parts) {
+        const text = data.candidates[0].content.parts[0].text;
+        const parsed = JSON.parse(text);
+        return {
+          to: parsed.to ? parsed.to.trim() : '',
+          plan: parsed.plan || `Analyzed user instruction: "${context}". Extracted recipient and drafted content.`,
+          subject: parsed.subject || 'Message from MailPilot',
+          body: parsed.body || context
+        };
+      } else if (data.error) {
+        console.warn('Gemini API returned error:', data.error);
+      }
     } catch (err) {
-      console.warn('Gemini drafting failed or API key invalid, falling back to parser:', err.message);
+      console.warn('Gemini drafting failed, falling back to rule parser:', err.message);
     }
   }
 
-  // Fallback parser if API key is not yet set
+  // Fallback parser if API call fails
   const emailMatch = context.match(EMAIL_REGEX);
   const to = emailMatch ? emailMatch[0] : '';
   
