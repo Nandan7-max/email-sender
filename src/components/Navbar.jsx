@@ -16,29 +16,22 @@ export default function Navbar({ theme, toggleTheme }) {
 
         {/* Navigation Links */}
         <nav className="agrica-nav-links">
-          <NavLink to="/" className={({ isActive }) => (isActive ? 'ag-link active' : 'ag-link')}>
-            Home
-          </NavLink>
-          <NavLink to="/about" className={({ isActive }) => (isActive ? 'ag-link active' : 'ag-link')}>
-            About
-          </NavLink>
-          <NavLink to="/agent" className={({ isActive }) => (isActive ? 'ag-link active' : 'ag-link')}>
-            Services
-          </NavLink>
-          <NavLink to="/blog" className={({ isActive }) => (isActive ? 'ag-link active' : 'ag-link')}>
-            Blog
-          </NavLink>
-          <NavLink to="/contact" className={({ isActive }) => (isActive ? 'ag-link active' : 'ag-link')}>
-            Contact
+          <a href="#home" className="ag-link">Home</a>
+          <a href="#about" className="ag-link">About</a>
+          <a href="#sender-agent" className="ag-link">AI Sender</a>
+          <a href="#history" className="ag-link">Email History</a>
+          <a href="#contact" className="ag-link">Contact</a>
+          <NavLink to="/agent" className="ag-link" style={{ color: 'var(--agrica-green)', fontWeight: 700 }}>
+            Full Agent App
           </NavLink>
         </nav>
 
         {/* Right CTA Pill Button matching Agrica style */}
         <div className="agrica-actions">
-          <NavLink to="/agent" className="agrica-cta-btn">
+          <a href="tel:9063889100" className="agrica-cta-btn">
             <PhoneCall size={15} />
-            <span>(10) 892-293 2678</span>
-          </NavLink>
+            <span>+91 9063889100</span>
+          </a>
 
           <button className="theme-toggle-minimal" onClick={toggleTheme} title="Toggle Dark/Light Mode">
             {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
