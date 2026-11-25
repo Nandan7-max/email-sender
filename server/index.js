@@ -85,23 +85,21 @@ app.post('/api/send-email', async (req, res) => {
 app.get('/api/email-logs', async (req, res) => {
   try {
     const supabase = getSupabaseClient();
-    if (!supabase) {
-      // Return empty array if Supabase not configured yet
-      return res.status(200).json([]);
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('email_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!error && Array.isArray(data) && data.length > 0) {
+        return res.status(200).json(data);
+      }
     }
 
-    const { data, error } = await supabase
-      .from('email_logs')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(20);
-
-    if (error) {
-      console.error('Supabase query error in /api/email-logs:', error.message);
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.status(200).json(data || []);
+    // Fallback to local logs so the UI always displays sent emails
+    const { getLocalLogs } = await import('./agent.js');
+    return res.status(200).json(getLocalLogs());
   } catch (error) {
     console.error('Error in /api/email-logs:', error);
     return res.status(500).json({ error: error.message || 'Failed to fetch logs.' });

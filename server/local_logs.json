@@ -1,0 +1,12 @@
+[
+  {
+    "id": "local-1795596772623",
+    "created_at": "2026-11-25T08:52:52.623Z",
+    "request": "send hi to nandanyadav10@gmail.com",
+    "to_email": "nandanyadav10@gmail.com",
+    "subject": "MailPilot Test Dispatch",
+    "body": "Hello Nandan, this is a live test from your MailPilot agent.",
+    "status": "sent",
+    "error": null
+  }
+]

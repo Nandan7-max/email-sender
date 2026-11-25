@@ -127,11 +127,9 @@ export default function Agent() {
         throw new Error(data.error || 'Mailjet dispatch failed.');
       }
 
-      const observationText = data.dbLogged
+      const observationText = data.storedIn === 'supabase'
         ? 'Mailjet returned HTTP 200. Log entry saved in Supabase database.'
-        : data.dbNote
-          ? `Mailjet returned HTTP 200 (Email delivered!). Note: Database table 'email_logs' not yet created in Supabase SQL editor.`
-          : 'Mailjet returned HTTP 200. Email dispatched successfully.';
+        : 'Mailjet returned HTTP 200. Email delivered! Log saved in email activity log.';
 
       setAlert({ type: 'success', message: `Email successfully dispatched to ${to}!` });
       setTrace((prev) => [

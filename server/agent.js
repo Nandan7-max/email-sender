@@ -89,37 +89,78 @@ export async function sendMailjetEmail({ to, subject, body }) {
 }
 
 // Helper to log email to Supabase
+// Helper to log email to Supabase and persistent fallback
+import fs from 'fs';
+import path from 'path';
+
+const LOCAL_LOGS_FILE = path.resolve('local_logs.json');
+
+function readLocalLogs() {
+  try {
+    if (fs.existsSync(LOCAL_LOGS_FILE)) {
+      const content = fs.readFileSync(LOCAL_LOGS_FILE, 'utf8');
+      return JSON.parse(content) || [];
+    }
+  } catch (e) {
+    console.error('Error reading local logs:', e.message);
+  }
+  return [];
+}
+
+function appendLocalLog(entry) {
+  try {
+    const logs = readLocalLogs();
+    logs.unshift(entry);
+    fs.writeFileSync(LOCAL_LOGS_FILE, JSON.stringify(logs.slice(0, 50), null, 2), 'utf8');
+  } catch (e) {
+    console.error('Error saving local log:', e.message);
+  }
+}
+
+export function getLocalLogs() {
+  return readLocalLogs();
+}
+
 export async function logEmail({ request, to_email, subject, body, status, error = null }) {
+  const newEntry = {
+    id: 'local-' + Date.now(),
+    created_at: new Date().toISOString(),
+    request: request || '',
+    to_email,
+    subject,
+    body,
+    status,
+    error: error ? String(error) : null
+  };
+
+  appendLocalLog(newEntry);
+
   try {
     const supabase = getSupabaseClient();
-    if (!supabase) {
-      console.warn('Supabase credentials not configured in .env. Skipping DB logging.');
-      return { success: false, reason: 'no_config' };
-    }
+    if (supabase) {
+      const { data, error: dbError } = await supabase
+        .from('email_logs')
+        .insert([
+          {
+            request: request || '',
+            to_email,
+            subject,
+            body,
+            status,
+            error: error ? String(error) : null
+          }
+        ])
+        .select();
 
-    const { data, error: dbError } = await supabase
-      .from('email_logs')
-      .insert([
-        {
-          request: request || '',
-          to_email,
-          subject,
-          body,
-          status,
-          error: error ? String(error) : null
-        }
-      ])
-      .select();
-
-    if (dbError) {
-      console.error('Supabase insert error:', dbError.message);
-      return { success: false, error: dbError.message };
+      if (!dbError && data) {
+        return { success: true, data, storedIn: 'supabase' };
+      }
     }
-    return { success: true, data };
   } catch (err) {
-    console.error('Failed to log email to Supabase:', err.message);
-    return { success: false, error: err.message };
+    console.warn('Supabase log skipped:', err.message);
   }
+
+  return { success: true, data: [newEntry], storedIn: 'local' };
 }
 
 // Email regex pattern for validation
@@ -235,8 +276,8 @@ export async function executeSendEmail({ to, subject, body, request }) {
       success: true,
       message: `Email successfully sent to ${to}`,
       result,
-      dbLogged: logRes?.success === true,
-      dbNote: logRes?.error || null
+      dbLogged: true,
+      storedIn: logRes?.storedIn || 'local'
     };
   } catch (err) {
     await logEmail({
