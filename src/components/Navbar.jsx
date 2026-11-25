@@ -8,7 +8,7 @@ export default function Navbar({ theme, toggleTheme }) {
       <div className="container header-container">
         <NavLink to="/" className="brand-logo">
           <Mail size={22} color="var(--purple-accent)" />
-          <span>MailPilot</span>
+          <span>Sendora</span>
         </NavLink>
 
         <nav className="nav-links">

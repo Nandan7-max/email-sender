@@ -4,7 +4,7 @@ export default function About() {
   return (
     <div className="container" style={{ maxWidth: 760 }}>
       <div className="page-header">
-        <h1 className="page-title">About MailPilot</h1>
+        <h1 className="page-title">About Sendora</h1>
         <p className="page-lead">
           An autonomous yet controllable email assistant designed to automate communication without compromising accuracy.
         </p>
@@ -12,7 +12,7 @@ export default function About() {
 
       <div className="panel" style={{ marginTop: 24, lineHeight: 1.7, fontSize: 14 }}>
         <p style={{ marginBottom: 16 }}>
-          MailPilot was built to bridge natural language understanding with strict real-world reliability. By pairing Google&rsquo;s Agent Development Kit (ADK) and Gemini models with Mailjet&rsquo;s battle-tested HTTP delivery infrastructure, MailPilot guarantees that your correspondence is both eloquently drafted and safely dispatched.
+          Sendora was built to bridge natural language understanding with strict real-world reliability. By pairing Google&rsquo;s Agent Development Kit (ADK) and Gemini models with Mailjet&rsquo;s battle-tested HTTP delivery infrastructure, Sendora guarantees that your correspondence is both eloquently drafted and safely dispatched.
         </p>
 
         <h3 style={{ fontSize: 18, fontWeight: 700, margin: '24px 0 12px 0' }}>Core Architectural Pillars</h3>

@@ -33,7 +33,7 @@ export default function App() {
 
       <footer className="footer">
         <div className="container">
-          <p>© {new Date().getFullYear()} MailPilot · Powered by Google ADK, Mailjet, and Supabase.</p>
+          <p>© {new Date().getFullYear()} Sendora · Powered by Google ADK, Mailjet, and Supabase.</p>
         </div>
       </footer>
     </div>

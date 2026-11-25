@@ -11,7 +11,7 @@ export default function Home() {
           <div className="hero-bg"></div>
           <div className="hero-overlay"></div>
           <div className="hero-content">
-            <h1 className="hero-headline">Send Smarter Emails with MailPilot</h1>
+            <h1 className="hero-headline">Send Smarter Emails with Sendora</h1>
             <p className="hero-paragraph">
               Tell our AI agent who to email and what to say. It writes the message, shows you a preview, and sends it for you.
             </p>
@@ -57,7 +57,7 @@ export default function Home() {
 
       {/* Features Overview */}
       <section className="section" style={{ paddingTop: 0 }}>
-        <h2 className="section-title">Why MailPilot?</h2>
+        <h2 className="section-title">Why Sendora?</h2>
         <div className="steps-grid">
           <div className="step-card">
             <Sparkles size={24} color="var(--purple-accent)" style={{ marginBottom: 12 }} />

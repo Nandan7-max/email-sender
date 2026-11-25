@@ -33,7 +33,7 @@ app.use(express.json());
 
 // 1. Health check route
 app.get('/', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'MailPilot Agent API' });
+  res.status(200).json({ status: 'ok', service: 'Sendora Agent API' });
 });
 
 // 2. Draft email preview route

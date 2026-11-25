@@ -24,7 +24,7 @@ export async function sendMailjetEmail({ to, subject, body }) {
   const apiKey = process.env.MAILJET_API_KEY;
   const secretKey = process.env.MAILJET_SECRET_KEY;
   const fromEmail = process.env.MAIL_FROM;
-  const fromName = process.env.MAIL_FROM_NAME || 'MailPilot';
+  const fromName = process.env.MAIL_FROM_NAME || 'Sendora';
 
   if (!apiKey || !secretKey || !fromEmail) {
     throw new Error('Missing Mailjet configuration: MAILJET_API_KEY, MAILJET_SECRET_KEY, or MAIL_FROM is not set in .env');
@@ -35,7 +35,7 @@ export async function sendMailjetEmail({ to, subject, body }) {
       {
         From: {
           Email: fromEmail,
-          Name: fromName
+          Name: 'From Sendora'
         },
         To: [
           {
@@ -179,14 +179,14 @@ export async function planAndDraftEmail(context) {
 
   if (apiKey) {
     try {
-      const prompt = `You are MailPilot, an intelligent AI email sending agent.
+      const prompt = `You are Sendora, an intelligent AI email sending agent.
 The user gave this instruction: "${context}"
 
 Analyze this instruction carefully:
 1. Extract the recipient email address. If no recipient email address is present in the instruction, set "to" to empty string ("").
 2. Formulate a step-by-step plan of what you determined.
 3. Write a polite, clear, professional subject line.
-4. Write a polite, high-quality, professional email body based on the instruction.
+4. Write a polite, high-quality, professional email body based on the instruction. Sign off as "From Sendora".
 
 Respond ONLY with a valid JSON object matching this schema, without markdown formatting or code blocks:
 {
@@ -214,7 +214,7 @@ Respond ONLY with a valid JSON object matching this schema, without markdown for
         return {
           to: parsed.to ? parsed.to.trim() : '',
           plan: parsed.plan || `Analyzed user instruction: "${context}". Extracted recipient and drafted content.`,
-          subject: parsed.subject || 'Message from MailPilot',
+          subject: parsed.subject || 'Message from Sendora',
           body: parsed.body || context
         };
       } else if (data.error) {
@@ -234,8 +234,8 @@ Respond ONLY with a valid JSON object matching this schema, without markdown for
     cleaned = cleaned.replace(to, '').replace(/to\s*:?/i, '').replace(/send\s*(an?\s*email\s*)?/i, '').trim();
   }
 
-  const subject = cleaned ? (cleaned.length > 30 ? cleaned.slice(0, 30) + '...' : cleaned) : 'Message from MailPilot';
-  const body = `Hello,\n\n${cleaned || context}\n\nBest regards,\nMailPilot Agent`;
+  const subject = cleaned ? (cleaned.length > 30 ? cleaned.slice(0, 30) + '...' : cleaned) : 'Message from Sendora';
+  const body = `Hello,\n\n${cleaned || context}\n\nBest regards,\nFrom Sendora`;
   const plan = to
     ? `Identified recipient <${to}> from instruction. Drafted polite subject and body based on: "${context}".`
     : `Could not identify recipient email in "${context}". Requesting recipient email from user.`;

@@ -5,7 +5,7 @@ const POSTS = [
     id: 1,
     tag: 'TIPS & STRATEGY',
     title: 'How to Write Email Prompts that AI Executes Perfectly',
-    snippet: 'Learn how to structure your plain-English instructions with clear context, recipient naming, and intended outcomes to make the most of MailPilot.',
+    snippet: 'Learn how to structure your plain-English instructions with clear context, recipient naming, and intended outcomes to make the most of Sendora.',
     date: 'Nov 2026'
   },
   {
@@ -28,7 +28,7 @@ export default function Blog() {
   return (
     <div className="container">
       <div className="page-header">
-        <h1 className="page-title">MailPilot Journal</h1>
+        <h1 className="page-title">Sendora Journal</h1>
         <p className="page-lead">
           Insights on artificial intelligence, modern email workflows, and human-agent collaboration.
         </p>

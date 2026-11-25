@@ -174,7 +174,7 @@ export default function Agent() {
       <div className="agent-header">
         <h1 className="agent-title">AI Mail Sending Agent</h1>
         <p className="agent-subtitle">
-          Type your command in natural language. MailPilot will analyze, draft, and await your confirmation before sending.
+          Type your command in natural language. Sendora will analyze, draft, and await your confirmation before sending.
         </p>
       </div>
 

@@ -13,7 +13,7 @@ export default function Contact() {
       <div className="page-header">
         <h1 className="page-title">Contact Us</h1>
         <p className="page-lead">
-          Have questions or feedback about the MailPilot agent? Drop us a note below.
+          Have questions or feedback about the Sendora agent? Drop us a note below.
         </p>
       </div>
 
