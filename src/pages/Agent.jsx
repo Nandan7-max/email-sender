@@ -127,12 +127,18 @@ export default function Agent() {
         throw new Error(data.error || 'Mailjet dispatch failed.');
       }
 
+      const observationText = data.dbLogged
+        ? 'Mailjet returned HTTP 200. Log entry saved in Supabase database.'
+        : data.dbNote
+          ? `Mailjet returned HTTP 200 (Email delivered!). Note: Database table 'email_logs' not yet created in Supabase SQL editor.`
+          : 'Mailjet returned HTTP 200. Email dispatched successfully.';
+
       setAlert({ type: 'success', message: `Email successfully dispatched to ${to}!` });
       setTrace((prev) => [
         ...prev,
         {
           title: '6. Tool Observation',
-          content: `Mailjet returned HTTP 200. Log entry saved in Supabase database.`
+          content: observationText
         }
       ]);
 
@@ -309,9 +315,12 @@ export default function Agent() {
             </div>
 
             {logs.length === 0 ? (
-              <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
-                No emails sent yet or Supabase database not connected.
-              </p>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+                <p style={{ marginBottom: 8 }}>No emails logged yet.</p>
+                <div style={{ background: 'var(--card-bg)', border: '1px solid var(--card-border)', borderRadius: 8, padding: 10, fontSize: 12 }}>
+                  <strong>Note:</strong> If you haven't created the table in Supabase yet, run the SQL in your Supabase SQL Editor so sent emails appear here.
+                </div>
+              </div>
             ) : (
               <div className="logs-list">
                 {logs.map((log) => (

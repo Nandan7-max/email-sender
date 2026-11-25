@@ -94,7 +94,7 @@ export async function logEmail({ request, to_email, subject, body, status, error
     const supabase = getSupabaseClient();
     if (!supabase) {
       console.warn('Supabase credentials not configured in .env. Skipping DB logging.');
-      return null;
+      return { success: false, reason: 'no_config' };
     }
 
     const { data, error: dbError } = await supabase
@@ -113,11 +113,12 @@ export async function logEmail({ request, to_email, subject, body, status, error
 
     if (dbError) {
       console.error('Supabase insert error:', dbError.message);
+      return { success: false, error: dbError.message };
     }
-    return data;
+    return { success: true, data };
   } catch (err) {
     console.error('Failed to log email to Supabase:', err.message);
-    return null;
+    return { success: false, error: err.message };
   }
 }
 
@@ -222,7 +223,7 @@ export async function executeSendEmail({ to, subject, body, request }) {
 
   try {
     const result = await sendMailjetEmail({ to, subject, body });
-    await logEmail({
+    const logRes = await logEmail({
       request: request || `Send email to ${to}`,
       to_email: to,
       subject,
@@ -233,7 +234,9 @@ export async function executeSendEmail({ to, subject, body, request }) {
     return {
       success: true,
       message: `Email successfully sent to ${to}`,
-      result
+      result,
+      dbLogged: logRes?.success === true,
+      dbNote: logRes?.error || null
     };
   } catch (err) {
     await logEmail({
